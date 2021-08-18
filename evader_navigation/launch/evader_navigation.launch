@@ -1,0 +1,49 @@
+<launch>
+
+  <!-- Call with the following command (adapt path, if necessary)-->
+  <!-- roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=$HOME/RoboticGames/catkin_ws/src/heist/createdMaps/map.yaml-->
+  <!-- Arguments -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="map_file" default="$(find evader_navigation)/maps/map.yaml"/>
+  <arg name="open_rviz" default="true"/>
+  <arg name="move_forward_only" default="false"/>
+
+  <arg name="evader_initial_pose_x" default="2.0"/>
+  <arg name="evader_initial_pose_y" default="-1.0"/>
+  <arg name="evader_initial_pose_a" default="1.57"/> 
+
+  <!-- Turtlebot3 -->
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <!-- AMCL -->
+  <include file="$(find evader_navigation)/launch/amcl.launch">
+    <arg name="scan_topic" value="/evader/scan" />
+    <arg name="initial_pose_x" value="$(arg evader_initial_pose_x)"/>
+    <arg name="initial_pose_y" value="$(arg evader_initial_pose_y)"/>
+    <arg name="initial_pose_a" value="$(arg evader_initial_pose_a)"/> 
+  </include>
+
+  <!-- move_base -->
+  <include file="$(find evader_navigation)/launch/move_base.launch">
+    <arg name="model" value="$(arg model)" />
+    <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+    <arg name="cmd_vel_topic" value="/evader/nav_stack_cmd_vel" />
+    <arg name="odom_topic" value="/evader/odom" />
+  </include>
+  
+  <!-- rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find evader_navigation)/rviz/turtlebot3_navigation.rviz"/>
+  </group>
+  
+  
+  <!-- NAVSTACK GOAL -->
+  <node pkg="evader_navigation" name="nav_stack_goal" type="navstack_goal.py"/>
+  
+</launch>

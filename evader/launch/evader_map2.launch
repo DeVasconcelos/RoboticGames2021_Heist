@@ -1,0 +1,12 @@
+<launch>
+  <include file="$(find evader_navigation)/launch/evader_navigation.launch">
+    <arg name="map_file" default="$(find evader)/maps/map_2.yaml"/>
+    <arg name="evader_initial_pose_x" default="4.5"/>
+    <arg name="evader_initial_pose_y" default="0.0"/>
+    <arg name="evader_initial_pose_a" default="1.57"/> 
+  </include>
+  
+  <node pkg="evader" type="guard_approximation.py" name="guard_approximation"/>  
+  
+  <node pkg="evader" type="guard_avoidance.py" name="guard_avoidance"/>  
+</launch>
